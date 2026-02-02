@@ -63,6 +63,8 @@ Then visit the enrollment portal and click the link.
 
 ### For Other Distros
 
+Use gemini-cli or claude-code or open-code or codex and have them read the AGENTS.md file, they should manage to fix the connection
+
 ... Godspeed.
 
 
