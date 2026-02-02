@@ -2,26 +2,18 @@
 
 Automatic enrollment and configuration for **UVG CAMPUS CENTRAL** WiFi network (802.1X EAP-TLS).
 
-## For Students
-
 ### Quick Start (Arch Linux)
 
 #### Step 1: Install the Package
 
 ```bash
-cd arch-package
 makepkg -si
 ```
 
 #### Step 2: Configure NetworkManager
 
 ```bash
-# Switch from iwd to NetworkManager (if using iwd)
-sudo systemctl disable --now iwd
 sudo systemctl enable --now NetworkManager
-
-# (Framework laptops only) Enable wifi-interface service
-sudo systemctl enable --now wifi-interface
 ```
 
 #### Step 3: Connect to Internet
@@ -69,6 +61,11 @@ Then visit the enrollment portal and click the link.
 
 ---
 
+### For Other Distros
+
+... Godspeed.
+
+
 ## What This Package Does
 
 ### 1. Extracts and installs HPE Aruba Onboard tools
@@ -99,27 +96,16 @@ Includes `wifi-interface.service` to fix the Intel WiFi netdev issue where `wlan
 ## Requirements
 
 ### Must Have
-- **NetworkManager** (not iwd)
+- **NetworkManager**
 - **wpa_supplicant** (for EAP-TLS, usually auto-installed with NetworkManager)
 - Qt5 libraries (for the enrollment GUI)
 
 ### Cannot Have
 - **iwd** - This package conflicts with iwd because iwd's TLS implementation fails with Aruba's RADIUS server
 
-### Optional
-- `wifi-interface.service` - Only needed for Framework 13 laptops (or similar Intel WiFi setups)
-
 ---
 
 ## Troubleshooting
-
-### WiFi interface (wlan0) doesn't appear after installing
-**Framework 13 laptop or similar issue:**
-```bash
-sudo systemctl enable --now wifi-interface
-sudo systemctl restart NetworkManager
-nmcli device status  # Should now show wlan0
-```
 
 ### Enrollment completes but password capture fails
 The helper script monitors D-Bus for the PKCS#12 password. If capture fails:
@@ -244,7 +230,6 @@ See `UVG-CAMPUS-CENTRAL-documentation.md` for full technical analysis.
 
 ### Building from source
 ```bash
-cd arch-package
 makepkg -s    # Build with dependency checking
 makepkg -si   # Build and install
 ```
@@ -271,9 +256,6 @@ sha256sum Aruba_Onboard_Installer.deb aruba-onboard-wrapper \
 ---
 
 ## FAQ
-
-**Q: Can I use this with iwd?**
-A: No. iwd's TLS implementation fails with Aruba's network. You must use NetworkManager + wpa_supplicant.
 
 **Q: Do I need to re-enroll every year?**
 A: Yes, certificates expire after 1 year. Re-enrollment is automatic through the same portal link.
