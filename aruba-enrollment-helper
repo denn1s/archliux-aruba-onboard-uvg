@@ -1,0 +1,91 @@
+#!/bin/bash
+# Aruba enrollment helper v2 - captures PKCS#12 password from D-Bus and auto-configures NM
+
+ARUBA_DIR="$HOME/.aruba-onboard"
+TIMEOUT=120
+DBUS_LOG="/tmp/aruba-dbus-capture-$$.log"
+
+# Start monitoring D-Bus for NetworkManager AddConnection calls
+# This captures the password that onboard-srv sends to NetworkManager
+dbus-monitor --session "interface='org.freedesktop.NetworkManager.Settings',member='AddConnection'" > "$DBUS_LOG" 2>&1 &
+DBUS_PID=$!
+
+cleanup() {
+    kill $DBUS_PID 2>/dev/null || true
+    rm -f "$DBUS_LOG"
+}
+trap cleanup EXIT
+
+echo "Enrollment helper: monitoring D-Bus for password..."
+
+# Wait for enrollment to complete and D-Bus call to be logged
+sleep $TIMEOUT &
+SLEEP_PID=$!
+
+# Monitor for certificate creation as indicator that enrollment happened
+while kill -0 $SLEEP_PID 2>/dev/null; do
+    if [ -f "$ARUBA_DIR"/*-ca.pem ] && \
+       [ -f "$ARUBA_DIR"/*-user.pem ] && \
+       [ -f "$ARUBA_DIR"/*-key.p12 ]; then
+        echo "Enrollment helper: certificates detected!"
+        kill $SLEEP_PID 2>/dev/null || true
+        break
+    fi
+    sleep 2
+done
+
+# Give D-Bus monitor a moment to flush the log
+sleep 3
+
+# Extract password from D-Bus log
+# The AddConnection call contains: "private-key-password": variant string "the-password-here"
+PASSWORD=$(grep -oP 'private-key-password.*?string\s+"\K[^"]+' "$DBUS_LOG" | head -1)
+
+if [ -z "$PASSWORD" ]; then
+    echo "Enrollment helper: failed to capture PKCS#12 password from D-Bus" >&2
+    echo "Enrollment helper: D-Bus log saved to $DBUS_LOG for debugging" >&2
+    zenity --warning --text="Enrollment completed but password capture failed.\n\nYou'll need to enter the PKCS#12 password manually when connecting.\n\nCheck ~/.aruba-onboard/ui.log for the password." --title="Aruba Onboard" 2>/dev/null
+    exit 1
+fi
+
+echo "Enrollment helper: PKCS#12 password captured!"
+
+# Find certificate files
+CA_CERT=$(ls "$ARUBA_DIR"/*-ca.pem 2>/dev/null | head -1)
+USER_CERT=$(ls "$ARUBA_DIR"/*-user.pem 2>/dev/null | head -1)
+PKCS12=$(ls "$ARUBA_DIR"/*-key.p12 2>/dev/null | head -1)
+
+# Extract SSID and identity
+SSID=$(basename "$CA_CERT" | sed 's/-ca\.pem$//')
+SCOPE_ID=$(openssl x509 -in "$USER_CERT" -noout -subject 2>/dev/null | grep -oP 'O\s*=\s*\K[^,]+' | head -1)
+ANON_IDENTITY="anonymous@${SCOPE_ID}.cloudauth.net"
+
+echo "Enrollment helper: configuring NetworkManager with password..."
+
+# Create or update connection with the captured password
+if nmcli connection show "$SSID" >/dev/null 2>&1; then
+    nmcli connection delete "$SSID"
+fi
+
+nmcli connection add \
+    type wifi \
+    con-name "$SSID" \
+    ifname wlan0 \
+    ssid "$SSID" \
+    wifi-sec.key-mgmt wpa-eap \
+    802-1x.eap tls \
+    802-1x.identity "$ANON_IDENTITY" \
+    802-1x.ca-cert "$CA_CERT" \
+    802-1x.client-cert "$USER_CERT" \
+    802-1x.private-key "$PKCS12" \
+    802-1x.private-key-password "$PASSWORD" \
+    802-1x.phase1-auth-flags 1 \
+    connection.autoconnect no
+
+# Secure the connection file (contains password)
+sudo chmod 600 "/etc/NetworkManager/system-connections/${SSID}.nmconnection" 2>/dev/null || true
+
+zenity --info --text="Enrollment successful!\n\nNetwork: $SSID\nConfiguration: Complete\n\nConnect now with:\n  nmcli connection up \"$SSID\"\n\nor click the WiFi icon and select \"$SSID\"" --title="Aruba Onboard Success" 2>/dev/null || \
+echo "SUCCESS: Ready to connect with: nmcli connection up \"$SSID\""
+
+exit 0

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=HPE Aruba Networking Onboard
+Comment=Enroll device for enterprise WiFi (UVG CAMPUS CENTRAL)
+Exec=/usr/bin/aruba-onboard %u
+Icon=aruba-onboard
+Terminal=false
+Categories=Network;System;
+MimeType=x-scheme-handler/arubadp;
+StartupNotify=true

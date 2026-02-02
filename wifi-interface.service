@@ -1,0 +1,14 @@
+[Unit]
+Description=Create wlan0 interface for NetworkManager (Framework laptop fix)
+Before=NetworkManager.service
+After=systemd-modules-load.service
+ConditionPathExists=/sys/class/ieee80211/phy0
+ConditionPathExists=!/sys/class/net/wlan0
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/iw phy phy0 interface add wlan0 type station
+
+[Install]
+WantedBy=multi-user.target

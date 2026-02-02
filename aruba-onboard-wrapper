@@ -1,0 +1,42 @@
+#!/bin/bash
+# Aruba Onboard wrapper for UVG - manages srv + ui lifecycle
+
+set -e
+
+# Check if NetworkManager is running
+if ! systemctl is-active --quiet NetworkManager; then
+    zenity --error --text="NetworkManager is not running.\n\nPlease ensure NetworkManager is active:\n  sudo systemctl start NetworkManager" --title="Aruba Onboard Error" 2>/dev/null || \
+    echo "ERROR: NetworkManager is not running. Start it with: sudo systemctl start NetworkManager" >&2
+    exit 1
+fi
+
+# Start enrollment helper in background (monitors for cert creation)
+/usr/lib/aruba-onboard/enrollment-helper &
+HELPER_PID=$!
+
+# Start onboard-srv in background
+/opt/aruba-onboard/bin/onboard-srv &
+SRV_PID=$!
+
+# Give srv time to start
+sleep 2
+
+# Check if srv is still running
+if ! kill -0 $SRV_PID 2>/dev/null; then
+    echo "ERROR: onboard-srv failed to start" >&2
+    kill $HELPER_PID 2>/dev/null || true
+    exit 1
+fi
+
+# Launch the UI with all arguments (arubadp:// URL)
+/opt/aruba-onboard/bin/onboard-ui "$@"
+UI_EXIT=$?
+
+# Cleanup: kill srv and helper
+kill $SRV_PID 2>/dev/null || true
+kill $HELPER_PID 2>/dev/null || true
+
+# Wait a moment for helper to finish if it detected certs
+sleep 1
+
+exit $UI_EXIT

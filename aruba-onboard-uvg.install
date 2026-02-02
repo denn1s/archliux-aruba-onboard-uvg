@@ -1,0 +1,47 @@
+post_install() {
+    # Register arubadp:// protocol handler
+    xdg-mime default aruba-onboard.desktop x-scheme-handler/arubadp 2>/dev/null || true
+    update-desktop-database -q 2>/dev/null || true
+
+    # Add VERSION_ID if missing (required by Aruba Onboard)
+    # Arch Linux uses rolling releases and doesn't include VERSION_ID by default
+    if ! grep -q '^VERSION_ID=' /etc/os-release 2>/dev/null; then
+        echo 'VERSION_ID="rolling"' >> /etc/os-release
+        echo "==> Added VERSION_ID to /etc/os-release (required by Aruba Onboard)"
+    fi
+
+    echo ""
+    echo "==> Aruba Onboard for UVG installed successfully!"
+    echo ""
+    echo "==> IMPORTANT: This package conflicts with iwd. If iwd is running:"
+    echo "    sudo systemctl stop iwd"
+    echo "    sudo systemctl disable iwd"
+    echo ""
+    echo "==> Ensure NetworkManager is running:"
+    echo "    sudo systemctl enable --now NetworkManager"
+    echo ""
+    echo "==> For Framework laptops (or if wlan0 doesn't appear):"
+    echo "    sudo systemctl enable --now wifi-interface"
+    echo ""
+    echo "==> To enroll your device:"
+    echo "    1. Visit the university enrollment portal"
+    echo "    2. Click the enrollment link (arubadp://...)"
+    echo "    3. The Aruba Onboard app will auto-configure NetworkManager"
+    echo "    4. Connect with: nmcli connection up \"UVG CAMPUS CENTRAL\""
+    echo ""
+}
+
+post_upgrade() {
+    post_install
+}
+
+pre_remove() {
+    # Cleanup
+    xdg-mime uninstall x-scheme-handler/arubadp 2>/dev/null || true
+
+    echo ""
+    echo "==> Aruba certificates in ~/.aruba-onboard/ were NOT removed"
+    echo "==> NetworkManager connections were NOT removed"
+    echo "==> Remove manually if needed"
+    echo ""
+}
