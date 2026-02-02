@@ -1,4 +1,4 @@
-# Maintainer: Your Name <your.email@uvg.edu.gt>
+# Maintainer: Your Name <dmaldana@uvg.edu.gt>
 pkgname=aruba-onboard-uvg
 pkgver=1.0.0
 pkgrel=1
