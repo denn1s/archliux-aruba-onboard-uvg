@@ -10,20 +10,13 @@ if ! systemctl is-active --quiet NetworkManager; then
     exit 1
 fi
 
-# Create runtime directory for lock files
-RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}/aruba-onboard-$$"
-mkdir -p "$RUNTIME_DIR"
-trap "rm -rf '$RUNTIME_DIR'" EXIT
-
 # Start enrollment helper in background (monitors for cert creation)
 /usr/lib/aruba-onboard/enrollment-helper &
 HELPER_PID=$!
 
-# Start onboard-srv in background (run from runtime dir so lock files go there)
-cd "$RUNTIME_DIR"
+# Start onboard-srv in background
 /opt/aruba-onboard/bin/onboard-srv &
 SRV_PID=$!
-cd - >/dev/null
 
 # Give srv time to start
 sleep 2
