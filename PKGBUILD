@@ -1,7 +1,7 @@
 # Maintainer: Dennis <dmaldana@uvg.edu.gt>
 pkgname=aruba-onboard-uvg
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc="HPE Aruba Onboard client for UVG CAMPUS CENTRAL (802.1X enrollment)"
 arch=('x86_64')
 url="https://www.arubanetworks.com/"
@@ -16,7 +16,7 @@ source=("aruba-onboard-data.tar.gz"
         "aruba-onboard.desktop")
 sha256sums=('c41f28d53bbb8fe1a9bbb0de7bd0587d3288090fc00742e1ea15d082122a50eb'
             '0591b3ceb0a8611e2eb46f691ff7157d774182d36fd24f047e55d90a763c4355'
-            '6b25caf382ef9e3c0489271b294dd97ab070acaa8c94628325180c265f6e3f8c'
+            '6950e06c6746bcc28694ec6addb8d3b74fc00b931d915cf5b0fe7bc162a0d31f'
             '97e696c0ffb540a6b52b95c011be1986ffa7ffb9896fbb4f5eed4ce173e96c77'
             '9ef0cf82134826ec42e060789ece9a1ccce42090a3713cf85ce4ee3626ba5f0a')
 install=aruba-onboard-uvg.install

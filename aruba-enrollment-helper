@@ -62,6 +62,15 @@ ANON_IDENTITY="anonymous@${SCOPE_ID}.cloudauth.net"
 
 echo "Enrollment helper: configuring NetworkManager with password..."
 
+# Auto-detect WiFi interface (supports various naming schemes: wlan0, wlp5s0, etc.)
+WIFI_IFACE=$(nmcli -t -f DEVICE,TYPE device status | grep ':wifi$' | head -1 | cut -d: -f1)
+if [ -z "$WIFI_IFACE" ]; then
+    echo "Enrollment helper: no WiFi interface detected, using '*' (any available)"
+    WIFI_IFACE="*"
+else
+    echo "Enrollment helper: detected WiFi interface: $WIFI_IFACE"
+fi
+
 # Create or update connection with the captured password
 if nmcli connection show "$SSID" >/dev/null 2>&1; then
     nmcli connection delete "$SSID"
@@ -70,7 +79,7 @@ fi
 nmcli connection add \
     type wifi \
     con-name "$SSID" \
-    ifname wlan0 \
+    ifname "$WIFI_IFACE" \
     ssid "$SSID" \
     wifi-sec.key-mgmt wpa-eap \
     802-1x.eap tls \
