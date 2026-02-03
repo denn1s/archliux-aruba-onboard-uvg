@@ -39,7 +39,9 @@ sudo systemctl enable --now NetworkManager
 
 4. **Enrollment complete!**
    - You should see a success message
-   - The app will close automatically
+   - You can close the app.
+   - The app will not be needed again until the certificates expired. There's no need to run anything in the background.
+   - Feel free to uninstall the app, only NetworkManager is needed. 
 
 #### Step 5: Connect to UVG Network
 
