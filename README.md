@@ -61,7 +61,7 @@ Then visit the enrollment portal and click the link.
 
 ### For Other Distros
 
-Use gemini-cli or claude-code or open-code or codex and have them read the AGENTS.md file, they should manage to fix the connection
+Use gemini-cli or claude-code or open-code or codex and have them read the AGENTS.md file, they should manage to fix the connection. Maybe.
 
 ... Godspeed.
 
@@ -175,7 +175,7 @@ If clicking the button on the enrollment page doesn't automatically launch the a
 
 6. **Continue with enrollment** as normal - the app should open and complete enrollment
 
-**Tip**: The link contains your enrollment token and is only valid for a limited time, so use it immediately after copying.
+**Tip**: The link contains your enrollment token and is only valid for a limited time, so use it immediately after copying. It is one use only, even if the process fails. 
 
 ---
 
@@ -282,7 +282,7 @@ A: Backup `~/.aruba-onboard/` directory before reinstalling. The certificates ma
 
 ## Credits
 
-- **Package**: Created for UVG students by [Your Name]
+- **Package**: Created for UVG students by Dennis
 - **HPE Aruba**: Original onboard tools
 - **Testing & Documentation**: Collaborative debugging effort
 
