@@ -14,6 +14,7 @@ source=("Aruba_Onboard_Installer.deb"
         "aruba-enrollment-helper"
         "wifi-interface.service"
         "aruba-onboard.desktop")
+noextract=("Aruba_Onboard_Installer.deb")
 sha256sums=('SKIP'  # Will be filled after creating all files
             'SKIP'
             'SKIP'
