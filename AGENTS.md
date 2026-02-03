@@ -60,6 +60,7 @@ ls usr/share/aruba-onboard/bin/
 # You can run them directly:
 ./usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
 ```
+Note: the authentication token can be obtained from the onboarding link. Ask your user to visit the url provided by the university and follow the onboarding process with the developer tools open to get the arubadp:// token. Guide them if necesary. 
 
 ### Method 2: Convert to Your Distro's Package
 
