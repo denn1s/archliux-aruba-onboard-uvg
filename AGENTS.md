@@ -6,8 +6,8 @@ You are helping a Linux user connect to **UVG CAMPUS CENTRAL** WiFi network usin
 
 **Critical Facts**:
 - **Network**: UVG CAMPUS CENTRAL (802.1X WPA-Enterprise, certificate-based auth)
-- **This ONLY works with NetworkManager + wpa_supplicant**
-- **iwd will NOT work** (iwd's TLS stack fails with Aruba RADIUS servers)
+- **Requirement**: This solution requires NetworkManager + wpa_supplicant
+- **Compatibility**: `iwd` is not supported (its TLS stack fails with Aruba RADIUS servers)
 - **Enrollment**: Browser-based via Aruba CloudGuest portal
 - **Platform**: Any Linux distro that supports NetworkManager
 
@@ -78,7 +78,7 @@ sudo zypper install aruba-onboard-*.rpm
 ```
 
 **Arch Linux (PKGBUILD)**:
-See the provided `arch-package/PKGBUILD` for a proper Arch package.
+See the provided `PKGBUILD` for a proper Arch package.
 
 **Gentoo (Manual)**:
 Extract and copy files manually to appropriate locations (see "Where to Install Files" below).
@@ -278,7 +278,7 @@ grep -oP 'string "[a-zA-Z0-9]{32}"' /tmp/dbus-capture.log | tail -1
    # openSUSE:      sudo zypper install libQt5Core5 libQt5Gui5 libQt5Svg5
    ```
 
-### Cannot Have
+### Backend Requirements
 
 **iwd must NOT be running**:
 ```bash
@@ -671,7 +671,7 @@ onboard-srv listens on `localhost:43671` when running:
 - **No authentication** (any local process can connect)
 - **Only accepts localhost connections** (not exposed to network)
 - **Recommendation**: Only run during enrollment, not as always-on service
-- See security analysis in `FOR-PROFESSOR.md`
+- See security analysis in `docs/PROFESSOR-GUIDE.md`
 
 ---
 
@@ -679,7 +679,7 @@ onboard-srv listens on `localhost:43671` when running:
 
 ### Arch Linux
 
-See `arch-package/PKGBUILD` for proper packaging.
+See `PKGBUILD` for proper packaging.
 Key differences:
 - Use `/usr/lib/systemd/system/` (not `/lib/systemd/system/`)
 - Add `VERSION_ID="rolling"` to `/etc/os-release` (Aruba app requires it)
@@ -781,19 +781,19 @@ Save as `/tmp/diagnostic.sh`, run with `bash /tmp/diagnostic.sh`.
 ## Additional Resources
 
 - **Full technical analysis**: `UVG-CAMPUS-CENTRAL-documentation.md`
-- **Student quick-start**: `README.md`, `STUDENT-GUIDE.md`
-- **Professor notes**: `FOR-PROFESSOR.md`
-- **Bug fixes applied**: `BUGFIXES.md`
+- **Student quick-start**: `README.md`, `docs/STUDENT-GUIDE.md`
+- **Professor notes**: `docs/PROFESSOR-GUIDE.md`
+- **Bug fixes applied**: `docs/BUGFIXES.md`
 
 ---
 
 ## Key Reminders for AI Agents
 
-1. **iwd does NOT work** - Always check and disable iwd first
-2. **PKCS#12 password is random** - Cannot be guessed, must capture during enrollment
-3. **Testing disrupts connectivity** - Prepare reconnect scripts before testing
-4. **Certificates expire in 1 year** - Check validity before debugging
-5. **Protocol handler may fail** - Have fallback to manual launch
-6. **onboard-srv often fails on non-Ubuntu** - Be ready to create NM connection manually
+1. **Requires NetworkManager** - Ensure the user is using NetworkManager.
+2. **PKCS#12 password is random** - Cannot be guessed, must capture during enrollment.
+3. **Testing disrupts connectivity** - Prepare reconnect scripts before testing.
+4. **Certificates expire in 1 year** - Check validity before debugging.
+5. **Protocol handler may fail** - Have fallback to manual launch.
+6. **onboard-srv often fails on non-Ubuntu** - Be ready to create NM connection manually.
 
 **Good luck helping the user connect to UVG WiFi!**

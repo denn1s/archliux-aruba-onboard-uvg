@@ -89,20 +89,18 @@ Creates a working WiFi connection profile:
 - PKCS#12 password automatically configured
 - Ready to connect immediately
 
-### 4. Framework laptop compatibility
-Includes `wifi-interface.service` to fix the Intel WiFi netdev issue where `wlan0` doesn't auto-create without iwd.
+### 4. Hardware compatibility fixes
+Includes fixes for specific hardware configurations (e.g. Framework laptops) where interfaces might not initialize correctly with standard settings.
 
 ---
 
 ## Requirements
 
-### Must Have
-- **NetworkManager**
-- **wpa_supplicant** (for EAP-TLS, usually auto-installed with NetworkManager)
-- Qt5 libraries (for the enrollment GUI)
+- **NetworkManager**: Required for EAP-TLS and connection management.
+- **wpa_supplicant**: The backend for NetworkManager (usually default).
+- **Qt5 libraries**: For the enrollment GUI.
 
-### Cannot Have
-- **iwd** - This package conflicts with iwd because iwd's TLS implementation fails with Aruba's RADIUS server
+*Note: This package is not compatible with `iwd` as the backend.*
 
 ---
 
@@ -119,17 +117,27 @@ The helper script monitors D-Bus for the PKCS#12 password. If capture fails:
        802-1x.private-key-password "YOUR-PASSWORD-HERE"
    ```
 
-### Connection fails with EAP-TLS errors
-Verify NetworkManager is using wpa_supplicant (not iwd):
+### Connection fails / I use `iwd`
+The university network requires NetworkManager with wpa_supplicant. `iwd` is not supported.
+
+**If you are using `iwd`, switch to NetworkManager:**
+```bash
+sudo systemctl stop iwd
+sudo systemctl disable iwd
+sudo systemctl restart NetworkManager
+```
+
+Verify backend:
 ```bash
 systemctl status NetworkManager
 # Should NOT show iwd backend
 ```
 
-### Still using iwd?
+### "wlan0 not found" (Framework Laptops)
+If your `wlan0` interface is missing (common on Framework 13 laptops without `iwd`), use the included fix:
+
 ```bash
-sudo systemctl stop iwd
-sudo systemctl disable iwd
+sudo systemctl enable --now wifi-interface
 sudo systemctl restart NetworkManager
 ```
 
