@@ -3,6 +3,11 @@ post_install() {
     xdg-mime default aruba-onboard.desktop x-scheme-handler/arubadp 2>/dev/null || true
     update-desktop-database -q 2>/dev/null || true
 
+    # Make aruba-onboard directory writable for lock files
+    # Mode 1777 = sticky bit + world writable (like /tmp)
+    chmod 1777 /usr/share/aruba-onboard
+    echo "==> Set /usr/share/aruba-onboard to mode 1777 for lock files"
+
     # Add VERSION_ID if missing (required by Aruba Onboard)
     # Arch Linux uses rolling releases and doesn't include VERSION_ID by default
     if ! grep -q '^VERSION_ID=' /etc/os-release 2>/dev/null; then

@@ -1,7 +1,7 @@
 # Maintainer: Dennis <dmaldana@uvg.edu.gt>
 pkgname=aruba-onboard-uvg
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="HPE Aruba Onboard client for UVG CAMPUS CENTRAL (802.1X enrollment)"
 arch=('x86_64')
 url="https://www.arubanetworks.com/"
