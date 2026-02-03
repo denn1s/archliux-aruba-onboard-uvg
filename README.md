@@ -1,4 +1,4 @@
-# Aruba Onboard for UVG
+# Aruba Onboard for Linux users at UVG
 
 Automatic enrollment and configuration for **UVG CAMPUS CENTRAL** WiFi network (802.1X EAP-TLS).
 
@@ -281,6 +281,10 @@ A: No. Certificates are device-specific (tied to your machine-id). Each device n
 
 **Q: What if I reinstall my OS?**
 A: Backup `~/.aruba-onboard/` directory before reinstalling. The certificates may still work if you keep the same `/etc/machine-id`.
+
+**Q: Is there a typo in the repo name?**
+A: Yes! I'm glad you noticed.
+
 
 ---
 
