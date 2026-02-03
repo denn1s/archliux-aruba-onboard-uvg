@@ -55,13 +55,15 @@ You should now be connected to the university WiFi!
 
 ### For Ubuntu Students
 
-The original `.deb` file works directly:
+You'll need to obtain the original `.deb` file from HPE Aruba and install it:
 ```bash
 sudo dpkg -i Aruba_Onboard_Installer.deb
 sudo apt-get install -f  # Fix dependencies
 ```
 
 Then visit the enrollment portal and click the link.
+
+Note: The Arch package uses a pre-extracted tarball for easier distribution.
 
 ### For Other Distros
 
@@ -248,9 +250,9 @@ makepkg -si   # Build and install
 ```
 
 ### Checksums
-Update SHA256 checksums in PKGBUILD after modifying scripts:
+Update SHA256 checksums in PKGBUILD after modifying files:
 ```bash
-sha256sum Aruba_Onboard_Installer.deb aruba-onboard-wrapper \
+sha256sum aruba-onboard-data.tar.gz aruba-onboard-wrapper \
           aruba-enrollment-helper wifi-interface.service \
           aruba-onboard.desktop
 ```
