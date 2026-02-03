@@ -1,7 +1,7 @@
 pkgbase = aruba-onboard-uvg
 	pkgdesc = HPE Aruba Onboard client for UVG CAMPUS CENTRAL (802.1X enrollment)
 	pkgver = 1.0.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://www.arubanetworks.com/
 	install = aruba-onboard-uvg.install
 	arch = x86_64
