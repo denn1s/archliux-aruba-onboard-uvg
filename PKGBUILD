@@ -15,11 +15,11 @@ source=("Aruba_Onboard_Installer.deb"
         "wifi-interface.service"
         "aruba-onboard.desktop")
 noextract=("Aruba_Onboard_Installer.deb")
-sha256sums=('SKIP'  # Will be filled after creating all files
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP')
+sha256sums=('55f984ec7b2e30438734aa9bceb35a392dce89df90d4d03333fac2c1080d841c'
+            '0591b3ceb0a8611e2eb46f691ff7157d774182d36fd24f047e55d90a763c4355'
+            '6b25caf382ef9e3c0489271b294dd97ab070acaa8c94628325180c265f6e3f8c'
+            '97e696c0ffb540a6b52b95c011be1986ffa7ffb9896fbb4f5eed4ce173e96c77'
+            '9ef0cf82134826ec42e060789ece9a1ccce42090a3713cf85ce4ee3626ba5f0a')
 install=aruba-onboard-uvg.install
 
 package() {
