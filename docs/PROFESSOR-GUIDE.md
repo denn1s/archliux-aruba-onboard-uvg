@@ -17,11 +17,10 @@ A complete Arch Linux package that automates UVG CAMPUS CENTRAL WiFi enrollment 
 
 ### Option 1: Source Package (Recommended for GitHub/GitLab)
 
-Share the entire `arch-package/` folder:
+Share this repository/folder:
 
 ```bash
 # Students clone/download, then:
-cd arch-package
 makepkg -si
 ```
 
@@ -30,7 +29,6 @@ makepkg -si
 Build once, distribute the `.pkg.tar.zst`:
 
 ```bash
-cd arch-package
 makepkg -s
 # Creates: aruba-onboard-uvg-1.0.0-1-x86_64.pkg.tar.zst
 
@@ -47,10 +45,10 @@ Upload to AUR (Arch User Repository):
 
 ---
 
-## Files in arch-package/
+## Files in this repository
 
 ```
-arch-package/
+.
 ├── PKGBUILD                        # Package build script
 ├── Aruba_Onboard_Installer.deb     # Original Ubuntu package (8.6MB)
 ├── aruba-onboard-wrapper           # Manages srv + ui lifecycle
@@ -59,9 +57,10 @@ arch-package/
 ├── wifi-interface.service          # Framework laptop fix
 ├── aruba-onboard-uvg.install       # Post-install messages
 ├── README.md                       # Technical documentation
-├── STUDENT-GUIDE.md                # Simple setup guide for students
-├── TESTING-CHECKLIST.md            # For you to verify it works
-└── FOR-PROFESSOR.md                # This file
+└── docs/
+    ├── STUDENT-GUIDE.md            # Simple setup guide for students
+    ├── TESTING-CHECKLIST.md        # For you to verify it works
+    └── PROFESSOR-GUIDE.md          # This file
 ```
 
 ---
@@ -73,7 +72,7 @@ arch-package/
 UVG's WiFi uses 802.1X EAP-TLS (certificate authentication). The challenges:
 
 1. **Aruba tools are Ubuntu-only** → We repackage for Arch
-2. **iwd doesn't work** → Package forces NetworkManager + wpa_supplicant
+2. **NetworkManager compatibility** → Package ensures NetworkManager + wpa_supplicant are used correctly
 3. **PKCS#12 password is randomly generated** → We capture it from D-Bus
 4. **Manual configuration is complex** → Fully automated
 
@@ -111,7 +110,7 @@ Student connects: nmcli connection up "UVG CAMPUS CENTRAL"
 
 ### 1. Test It Yourself
 
-Follow `TESTING-CHECKLIST.md` on:
+Follow `TESTING-CHECKLIST.md` (in this folder) on:
 - Your own laptop (at UVG campus)
 - A student's laptop (with permission)
 - A VM if possible
@@ -127,7 +126,6 @@ Follow `TESTING-CHECKLIST.md` on:
 After any modifications to scripts:
 
 ```bash
-cd arch-package
 sha256sum Aruba_Onboard_Installer.deb aruba-onboard-wrapper \
           aruba-enrollment-helper wifi-interface.service \
           aruba-onboard.desktop
@@ -141,7 +139,7 @@ Edit these files with your contact info:
 
 - **PKGBUILD**: Line 1 (Maintainer)
 - **README.md**: Support section at bottom
-- **STUDENT-GUIDE.md**: Questions section
+- **docs/STUDENT-GUIDE.md**: Questions section
 
 ### 4. Write a Short Announcement
 
@@ -152,7 +150,7 @@ Example:
 > I've created an automated package for Arch/EndeavourOS/Manjaro users to connect to our university WiFi.
 >
 > **Installation**: [link to GitHub/shared folder]
-> **Guide**: See STUDENT-GUIDE.md
+> **Guide**: See docs/STUDENT-GUIDE.md
 > **Support**: [your contact method]
 >
 > The entire process takes < 5 minutes.
@@ -164,24 +162,16 @@ Example:
 ### Common Issues and Solutions
 
 **"wlan0 not found"** (Framework 13 laptops)
-```bash
-sudo systemctl enable --now wifi-interface
-sudo systemctl restart NetworkManager
-```
+- Run: `sudo systemctl enable --now wifi-interface && sudo systemctl restart NetworkManager`
 
 **"Password capture failed"**
 - Usually works anyway (NM will prompt)
 - Or: password is in `~/.aruba-onboard/ui.log`
 - Add manually: `nmcli connection modify "UVG CAMPUS CENTRAL" 802-1x.private-key-password "PASSWORD"`
 
-**"Connection failed" at UVG**
+**"Connection failed" at UVG / "eapFail"**
 - Verify they're using NetworkManager (not iwd): `systemctl is-active NetworkManager`
-- Check logs: `journalctl -u NetworkManager -f`
-- Possible certificate issue (re-enroll)
-
-**"Still using iwd"**
-- They skipped the switch step
-- Follow: `sudo systemctl disable --now iwd && sudo systemctl enable --now NetworkManager`
+- If they have `iwd` active, they must disable it: `sudo systemctl disable --now iwd`
 
 ---
 
@@ -214,7 +204,7 @@ Your Arch package works on Manjaro (they're Arch-based).
 When you need to update (e.g., new Aruba version):
 
 1. Get new `Aruba_Onboard_Installer.deb`
-2. Replace in `arch-package/`
+2. Replace in the root folder
 3. Update `pkgver` in PKGBUILD
 4. Regenerate checksums
 5. Test enrollment
@@ -284,7 +274,7 @@ If you prefer not to use this package, students can:
 3. Extract certificates manually
 4. Configure NetworkManager manually
 
-See `UVG-CAMPUS-CENTRAL-documentation.md` for the full manual process.
+See `../README.md` for the full manual process.
 
 **But this package saves ~30 minutes per student** and eliminates configuration errors.
 
@@ -310,7 +300,7 @@ After distributing, track:
 - Time spent on support
 
 Use this to improve:
-- STUDENT-GUIDE.md (clarify confusing parts)
+- docs/STUDENT-GUIDE.md (clarify confusing parts)
 - Error messages in scripts
 - Dependencies in PKGBUILD
 
@@ -359,7 +349,7 @@ If you need help with:
 - Updating for new Aruba versions
 - AUR publication
 
-Feel free to reach out (or reference `UVG-CAMPUS-CENTRAL-documentation.md` for deep technical details).
+Feel free to reach out (or reference `../README.md` for deep technical details).
 
 ---
 
@@ -367,7 +357,7 @@ Feel free to reach out (or reference `UVG-CAMPUS-CENTRAL-documentation.md` for d
 
 1. **Test**: Follow `TESTING-CHECKLIST.md` on your laptop at UVG
 2. **Customize**: Add your name/contact to PKGBUILD and guides
-3. **Distribute**: Share `arch-package/` folder or build `.pkg.tar.zst`
+3. **Distribute**: Share this repository folder or build `.pkg.tar.zst`
 4. **Announce**: Post in class Discord/Moodle/email with link to STUDENT-GUIDE.md
 5. **Support**: Answer questions as they come
 

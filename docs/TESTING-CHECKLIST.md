@@ -10,7 +10,7 @@ Before distributing to students, test these scenarios:
 
 ---
 
-## Test 1: Clean Install (iwd user switching to NM)
+## Test 1: Clean Install (Switching to NM)
 
 **Starting state**: Fresh Arch with iwd
 
@@ -20,7 +20,6 @@ systemctl is-active iwd  # Should be: active
 systemctl is-active NetworkManager  # Should be: inactive
 
 # Install package
-cd arch-package
 makepkg -si
 
 # Follow post-install instructions
@@ -30,7 +29,7 @@ sudo systemctl enable --now NetworkManager
 # Check wlan0
 nmcli device status | grep wlan0
 
-# If missing (Framework):
+# If missing (Hardware compatibility fix):
 sudo systemctl enable --now wifi-interface
 sudo systemctl restart NetworkManager
 nmcli device status | grep wlan0
@@ -153,7 +152,7 @@ nmcli connection up "UVG CAMPUS CENTRAL"
 
 ---
 
-## Test 6: Framework Laptop (wlan0 issue)
+## Test 6: Hardware Compatibility Fix (wlan0 issue)
 
 **Only if you have a Framework 13 or similar:**
 
@@ -337,7 +336,7 @@ Test 2 (Enrollment): PASS / FAIL
 Test 3 (Auto-Config): PASS / FAIL
 Test 4 (D-Bus Capture): PASS / FAIL
 Test 5 (Persistence): PASS / FAIL
-Test 6 (Framework Fix): PASS / FAIL / N/A
+Test 6 (Hardware Fix): PASS / FAIL / N/A
 Test 7 (Error Handling): PASS / FAIL
 Test 8 (Removal): PASS / FAIL
 Test 9 (Rollback): PASS / FAIL

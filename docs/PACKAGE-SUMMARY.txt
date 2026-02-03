@@ -17,18 +17,16 @@ aruba-onboard-uvg.install     - Post-install instructions
 
 DOCUMENTATION
 =============
-README.md                     - Technical documentation & troubleshooting
+README.md                     - Technical documentation & troubleshooting (in parent dir)
 STUDENT-GUIDE.md              - Simple setup guide for students
-FOR-PROFESSOR.md              - Distribution & support guide
+PROFESSOR-GUIDE.md            - Distribution & support guide
 TESTING-CHECKLIST.md          - Testing checklist before distribution
-UVG-CAMPUS-CENTRAL-documentation.md - Full technical analysis (in parent dir)
 
 STUDENT WORKFLOW
 ================
-1. Install: cd arch-package && makepkg -si
-2. Switch to NetworkManager: sudo systemctl disable --now iwd && sudo systemctl enable --now NetworkManager
-3. Enroll: Click enrollment link from university portal
-4. Connect: nmcli connection up "UVG CAMPUS CENTRAL"
+1. Install: makepkg -si
+2. Enroll: Click enrollment link from university portal
+3. Connect: nmcli connection up "UVG CAMPUS CENTRAL"
 
 AUTOMATION FEATURES
 ===================
@@ -37,27 +35,25 @@ AUTOMATION FEATURES
 ✓ Manages onboard-srv + onboard-ui lifecycle
 ✓ Captures PKCS#12 password from D-Bus automatically
 ✓ Auto-configures NetworkManager connection with all parameters
-✓ Creates wlan0 interface on Framework laptops
-✓ Conflicts with iwd (forces NetworkManager)
+✓ Includes compatibility fixes for hardware (e.g. Framework laptops)
+✓ Enforces NetworkManager compatibility
 ✓ Shows success/failure notifications
 
 KEY INSIGHT
 ===========
-iwd does NOT work with UVG's network (EAP-TLS fails)
-NetworkManager + wpa_supplicant DOES work (OpenSSL TLS)
+The university network requires NetworkManager + wpa_supplicant.
 This package enforces the working configuration.
 
 NEXT STEPS FOR PROFESSOR
 =========================
-1. Read FOR-PROFESSOR.md
+1. Read PROFESSOR-GUIDE.md
 2. Test on your laptop (TESTING-CHECKLIST.md)
 3. Customize with your contact info
-4. Distribute to students (share arch-package/ folder)
+4. Distribute to students (share this repository)
 5. Point students to STUDENT-GUIDE.md
 
 BUILD COMMAND
 =============
-cd arch-package
 makepkg -si
 
 or for distribution:
@@ -67,7 +63,6 @@ SUPPORT RESOURCES
 =================
 - Common issues: See README.md "Troubleshooting" section
 - Testing guide: TESTING-CHECKLIST.md
-- Technical details: UVG-CAMPUS-CENTRAL-documentation.md
 
 SUCCESS RATE
 ============
