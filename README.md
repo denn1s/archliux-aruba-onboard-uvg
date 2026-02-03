@@ -1,4 +1,4 @@
-# Aruba Onboard for UVG - Arch Linux Package
+# Aruba Onboard for UVG
 
 Automatic enrollment and configuration for **UVG CAMPUS CENTRAL** WiFi network (802.1X EAP-TLS).
 
@@ -295,10 +295,10 @@ This package wraps proprietary HPE Aruba Onboard software. The wrapper scripts a
 ## Support
 
 For issues specific to this package:
-- Contact: [Your Email/Matrix/Discord]
+- Contact: dmaldana@uvg.edu.gt
 
 For network connectivity issues at UVG:
-- IT Support: [University IT contact]
+- IT Support: lol
 
 For Aruba Onboard tool issues:
 - HPE Aruba Networks support
