@@ -2,56 +2,46 @@
 
 Automatic enrollment and configuration for **UVG CAMPUS CENTRAL** WiFi network (802.1X EAP-TLS).
 
-Note: Steps 1 to 4 don't require the univeristy network and can be completed at home.  
+**Requirements**:
+- NetworkManager (not compatible with iwd)
+- Internet connection for enrollment (you don't need to be on campus)
 
-### Quick Start (Arch Linux)
+---
 
-#### Step 1: Install the Package
+## Quick Start
+
+### 1. Install the Package
 
 ```bash
 makepkg -si
 ```
 
-#### Step 2: Configure NetworkManager
+### 2. Enroll Your Device
 
-```bash
-sudo systemctl enable --now NetworkManager
-```
-
-#### Step 3: Connect to Internet
-
-**Important**: You need an active internet connection for enrollment (use your phone's hotspot, home WiFi, or any available network).
-
-#### Step 4: Enroll Your Device
-
-1. **Visit the enrollment portal** (while connected to internet):
+1. Visit the enrollment portal:
    ```
    https://uswest4.cloudguest.central.arubanetworks.com/portal/scope.cust-52e107d4ed9b11ec8b7e52e2ed9a47ed/cda-user-portal/passpoint
    ```
 
-2. **Click "Yes, I already have HPE Aruba Networking Onboard"**
-   - Ignore any warnings about "unsupported operating system"
-   - The package you installed makes Arch Linux supported!
+2. Click **"Yes, I already have HPE Aruba Networking Onboard"**
+   - Ignore the "unsupported operating system" warning
 
-3. **Click "Install using HPE Aruba Networking Onboard app"**
-   - This should automatically launch the enrollment app
-   - A window will appear asking you to accept certificates
-   - Click "Accept" or "Continue" when prompted
+3. Click **"Install using HPE Aruba Networking Onboard app"**
+   - The enrollment app will launch automatically
+   - Click "Accept" when prompted for certificates
    - Wait for enrollment to complete
 
-4. **Enrollment complete!**
-   - You should see a success message
-   - You can close the app.
-   - The app will not be needed again until the certificates expired. There's no need to run anything in the background.
-   - Feel free to uninstall the app, only NetworkManager is needed. 
+4. **Done!** The app configured everything automatically.
 
-#### Step 5: Connect to UVG Network
+### 3. Connect to UVG Network
 
 ```bash
 nmcli connection up "UVG CAMPUS CENTRAL"
 ```
 
-You should now be connected to the university WiFi!
+Or select "UVG CAMPUS CENTRAL" from your WiFi menu.
+
+---
 
 ### For Ubuntu Students
 
@@ -71,42 +61,12 @@ Use gemini-cli or claude-code or open-code or codex and have them read the AGENT
 
 ... Godspeed.
 
----
-
 ## What This Package Does
 
-### 1. Extracts and installs HPE Aruba Onboard tools
-- Binaries installed to `/opt/aruba-onboard/`
-- Desktop integration for `arubadp://` protocol
-
-### 2. Automatic enrollment workflow
-When you click an enrollment link from the university portal:
-- Wrapper script starts `onboard-srv` (background D-Bus service)
-- Launches `onboard-ui` (enrollment GUI)
-- Monitors D-Bus to capture the PKCS#12 password
-- Downloads certificates from Aruba CloudGuest
-- Auto-configures NetworkManager with complete credentials
-- **You don't need to manually configure anything**
-
-### 3. NetworkManager integration
-Creates a working WiFi connection profile:
-- SSID: `UVG CAMPUS CENTRAL`
-- EAP-TLS with certificates
-- PKCS#12 password automatically configured
-- Ready to connect immediately
-
-### 4. Hardware compatibility fixes
-Includes fixes for specific hardware configurations (e.g. Framework laptops) where interfaces might not initialize correctly with standard settings.
-
----
-
-## Requirements
-
-- **NetworkManager**: Required for EAP-TLS and connection management.
-- **wpa_supplicant**: The backend for NetworkManager (usually default).
-- **Qt5 libraries**: For the enrollment GUI.
-
-*Note: This package is not compatible with `iwd` as the backend.*
+- Installs HPE Aruba Onboard enrollment tools
+- Automatically configures NetworkManager when you enroll
+- Creates WiFi connection profile with certificates
+- No manual configuration needed
 
 ---
 
@@ -123,28 +83,19 @@ The helper script monitors D-Bus for the PKCS#12 password. If capture fails:
        802-1x.private-key-password "YOUR-PASSWORD-HERE"
    ```
 
-### Connection fails / I use `iwd`
-The university network requires NetworkManager with wpa_supplicant. `iwd` is not supported.
+### Connection fails
 
-**If you are using `iwd`, switch to NetworkManager:**
+If using `iwd` instead of NetworkManager, switch to NetworkManager:
 ```bash
-sudo systemctl stop iwd
-sudo systemctl disable iwd
-sudo systemctl restart NetworkManager
+sudo systemctl disable --now iwd
+sudo systemctl enable --now NetworkManager
 ```
 
-Verify backend:
-```bash
-systemctl status NetworkManager
-# Should NOT show iwd backend
-```
+### WiFi interface missing (Framework Laptops)
 
-### "wlan0 not found" (Framework Laptops)
-If your `wlan0` interface is missing (common on Framework 13 laptops without `iwd`), use the included fix:
-
+Some laptops need help initializing the WiFi interface:
 ```bash
 sudo systemctl enable --now wifi-interface
-sudo systemctl restart NetworkManager
 ```
 
 ### Check connection status
@@ -186,20 +137,6 @@ If clicking the button on the enrollment page doesn't automatically launch the a
 ---
 
 ## Technical Details
-
-### Why NetworkManager instead of iwd?
-
-**iwd fails with UVG's network** (tested extensively):
-- `EAP completed with eapFail`
-- `4-Way handshake failed, reason: 23`
-- Root cause: iwd's built-in TLS stack incompatible with Aruba RADIUS server
-
-**wpa_supplicant (via NetworkManager) works**:
-- Uses OpenSSL for TLS (more mature, compatible)
-- Successfully negotiates with Aruba ClearPass
-- Handles TLS 1.2/1.3 properly
-
-See `UVG-CAMPUS-CENTRAL-documentation.md` for full technical analysis.
 
 ### Network specifications
 - **802.1X**: WPA2/WPA3-Enterprise
@@ -264,9 +201,8 @@ sha256sum aruba-onboard-data.tar.gz aruba-onboard-wrapper \
 4. Test actual network connection
 
 ### Known Issues
-- **D-Bus password capture**: Requires dbus-monitor access (should work for normal users)
-- **Framework laptop wlan0 issue**: Documented and fixed with wifi-interface.service
-- **iwd conflict**: Intentional - package will refuse to install if iwd is present
+- **D-Bus password capture**: May fail in restricted environments (check logs if enrollment doesn't complete)
+- **Framework laptops**: May need wifi-interface.service enabled
 
 ---
 

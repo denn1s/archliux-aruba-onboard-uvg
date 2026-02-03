@@ -15,16 +15,18 @@ You are helping a Linux user connect to **UVG CAMPUS CENTRAL** WiFi network usin
 
 ## Understanding the Components
 
-### What's in the .deb Package
+### Installation Files
 
-The `Aruba_Onboard_Installer.deb` contains three binaries:
+This repository provides `aruba-onboard-data.tar.gz` which contains the HPE Aruba Onboard binaries:
 
 ```
-/usr/share/aruba-onboard/bin/
+usr/share/aruba-onboard/bin/
 ├── onboard-srv    # D-Bus service for NetworkManager integration
 ├── onboard-ui     # Qt5 GUI for enrollment
 └── onboard-cli    # Command-line tool (rarely used)
 ```
+
+**For Ubuntu users**: Download the official `Aruba_Onboard_Installer.deb` from the UVG enrollment portal instead of using the tarball.
 
 **How enrollment works**:
 
@@ -42,68 +44,84 @@ The `Aruba_Onboard_Installer.deb` contains three binaries:
 
 ---
 
-## Extracting the .deb (Any Distro)
+## Installation by Distribution
 
-### Method 1: Direct Extraction (No Installation)
+### Arch Linux
 
+Use the provided `PKGBUILD`:
 ```bash
-# Extract the .deb archive
-mkdir aruba-extracted
-cd aruba-extracted
-ar x ../Aruba_Onboard_Installer.deb
-tar xf data.tar.xz
-
-# Binaries are now in:
-ls usr/share/aruba-onboard/bin/
-# onboard-cli  onboard-srv  onboard-ui
-
-# You can run them directly:
-./usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
-```
-Note: the authentication token can be obtained from the onboarding link. Ask your user to visit the url provided by the university and follow the onboarding process with the developer tools open to get the arubadp:// token. Guide them if necesary. 
-
-### Method 2: Convert to Your Distro's Package
-
-**Fedora/RHEL (RPM)**:
-```bash
-sudo dnf install alien
-alien --to-rpm Aruba_Onboard_Installer.deb
-sudo dnf install aruba-onboard-*.rpm
+makepkg -si
 ```
 
-**openSUSE (RPM)**:
+This automatically handles the tarball extraction, wrapper scripts, and NetworkManager integration.
+
+### Ubuntu/Debian
+
+Download the official `.deb` installer from the UVG enrollment portal, then:
 ```bash
-sudo zypper install alien
-alien --to-rpm Aruba_Onboard_Installer.deb
-sudo zypper install aruba-onboard-*.rpm
+sudo dpkg -i Aruba_Onboard_Installer.deb
+sudo apt-get install -f  # Fix dependencies
 ```
 
-**Arch Linux (PKGBUILD)**:
-See the provided `PKGBUILD` for a proper Arch package.
+### Other Linux Distributions
 
-**Gentoo (Manual)**:
-Extract and copy files manually to appropriate locations (see "Where to Install Files" below).
+Extract the provided `aruba-onboard-data.tar.gz` and set up the protocol handler:
+
+```bash
+# Extract the tarball
+tar xzf aruba-onboard-data.tar.gz
+
+# Copy binaries to system location (optional but recommended)
+sudo mkdir -p /opt/aruba-onboard/bin
+sudo cp usr/share/aruba-onboard/bin/* /opt/aruba-onboard/bin/
+sudo chmod +x /opt/aruba-onboard/bin/*
+
+# Create desktop file for protocol handler
+sudo tee /usr/share/applications/aruba-onboard.desktop > /dev/null << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Aruba Onboard
+Exec=/opt/aruba-onboard/bin/onboard-ui %u
+MimeType=x-scheme-handler/arubadp
+NoDisplay=true
+EOF
+
+# Register the arubadp:// protocol handler
+xdg-mime default aruba-onboard.desktop x-scheme-handler/arubadp
+update-desktop-database -q 2>/dev/null || true
+
+# Create runtime directory (needed for lock files)
+sudo mkdir -p /usr/share/aruba-onboard
+sudo chmod 1777 /usr/share/aruba-onboard
+```
+
+**Protocol handler registration**: This allows your browser to automatically launch the enrollment app when you click the enrollment link from the portal. Without this, you'll need to manually copy the `arubadp://` URL and run the app from the terminal.
+
+**Note**: If the protocol handler doesn't work, you can get the authentication token from the browser developer tools (see "Issue 4: Protocol Handler Doesn't Work" in the Debugging section).
 
 ### Where to Install Files
 
-If creating a custom package or installing manually:
+Standard installation locations (for manual installation or custom packages):
 
 ```bash
-# Binaries (choose one location):
-/opt/aruba-onboard/bin/          # Recommended: self-contained
-/usr/local/bin/                   # Alternative: system-wide
+# Binaries:
+/opt/aruba-onboard/bin/onboard-cli
+/opt/aruba-onboard/bin/onboard-srv
+/opt/aruba-onboard/bin/onboard-ui
 
-# Desktop file (for arubadp:// protocol):
+# Desktop file (for arubadp:// protocol handler):
 /usr/share/applications/aruba-onboard.desktop
 
-# Icon:
+# Icon (optional):
 /usr/share/pixmaps/aruba-onboard.png
 
-# Runtime directory (needed!):
-/usr/share/aruba-onboard/         # Keep this directory (for lock files)
+# Runtime directory (required for lock files):
+/usr/share/aruba-onboard/    # Mode 1777 (sticky bit + world writable)
 ```
 
-**Important**: The app expects `/usr/share/aruba-onboard/` to exist for runtime lock files, even if empty.
+**Important**:
+- The app expects `/usr/share/aruba-onboard/` to exist with mode 1777 for runtime lock files
+- The desktop file must be registered with `xdg-mime` for the `arubadp://` protocol handler to work
 
 ---
 
@@ -170,11 +188,14 @@ PRIVATE_KEY=$(ls ~/.aruba-onboard/*-key.p12)
 IDENTITY="anonymous@52e107d4ed9b11ec8b7e52e2ed9a47ed.cloudauth.net"
 PASSWORD="<captured-password-here>"
 
+# Auto-detect WiFi interface
+WIFI_IFACE=$(nmcli -t -f DEVICE,TYPE device status | grep ':wifi$' | head -1 | cut -d: -f1)
+
 # Create connection
 nmcli connection add \
     type wifi \
     con-name "UVG CAMPUS CENTRAL" \
-    ifname wlan0 \
+    ifname "$WIFI_IFACE" \
     ssid "UVG CAMPUS CENTRAL" \
     wifi-sec.key-mgmt wpa-eap \
     802-1x.eap tls \
@@ -199,11 +220,14 @@ If you have the password but want to avoid storing it in NetworkManager:
 PKCS12_FILE=$(ls ~/.aruba-onboard/*-key.p12)
 openssl pkcs12 -in "$PKCS12_FILE" -nocerts -nodes -out ~/.aruba-onboard/private-key.pem
 
+# Auto-detect WiFi interface
+WIFI_IFACE=$(nmcli -t -f DEVICE,TYPE device status | grep ':wifi$' | head -1 | cut -d: -f1)
+
 # Use unencrypted key in connection
 nmcli connection add \
     type wifi \
     con-name "UVG CAMPUS CENTRAL" \
-    ifname wlan0 \
+    ifname "$WIFI_IFACE" \
     ssid "UVG CAMPUS CENTRAL" \
     wifi-sec.key-mgmt wpa-eap \
     802-1x.eap tls \
@@ -351,16 +375,19 @@ If clicking the button doesn't launch the app:
 
 ### 4. Run Enrollment
 
-**Simple approach** (if onboard-srv works):
+**For Arch Linux** (using the package):
 ```bash
-# Install and run the GUI
-/usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
+aruba-onboard "arubadp://..."
 ```
 
-**Advanced approach** (with password capture):
+**For other distros** (using extracted tarball):
 ```bash
+# Simple approach (if onboard-srv works):
+./usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
+
+# Advanced approach (with password capture):
 # Start onboard-srv in background
-/usr/share/aruba-onboard/bin/onboard-srv &
+./usr/share/aruba-onboard/bin/onboard-srv &
 SRV_PID=$!
 
 # Monitor D-Bus for password
@@ -368,7 +395,7 @@ dbus-monitor --session "sender='net.aruba.onboard'" 2>&1 | tee /tmp/enrollment-d
 MONITOR_PID=$!
 
 # Run enrollment UI
-/usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
+./usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
 
 # After enrollment completes:
 kill $MONITOR_PID
@@ -695,41 +722,33 @@ onboard-srv listens on `localhost:43671` when running:
 
 ### Arch Linux
 
-See `PKGBUILD` for proper packaging.
+Use the provided `PKGBUILD` for proper packaging:
+```bash
+makepkg -si
+```
+
 Key differences:
-- Use `/usr/lib/systemd/system/` (not `/lib/systemd/system/`)
-- Add `VERSION_ID="rolling"` to `/etc/os-release` (Aruba app requires it)
+- Uses `/usr/lib/systemd/system/` (not `/lib/systemd/system/`)
+- Automatically adds `VERSION_ID="rolling"` to `/etc/os-release` (Aruba app requires it)
+- Auto-detects WiFi interface name (wlan0, wlp5s0, etc.)
 
 ### Ubuntu/Debian
 
-The .deb works natively:
+Download the official `.deb` from the UVG enrollment portal:
 ```bash
 sudo dpkg -i Aruba_Onboard_Installer.deb
 sudo apt-get install -f
 ```
 
-### Fedora/RHEL
+### Fedora/RHEL/openSUSE/Gentoo
 
-Use alien or extract manually:
+Extract the provided `aruba-onboard-data.tar.gz` and run binaries directly:
 ```bash
-alien --to-rpm Aruba_Onboard_Installer.deb
-sudo dnf install aruba-onboard-*.rpm
+tar xzf aruba-onboard-data.tar.gz
+./usr/share/aruba-onboard/bin/onboard-ui "arubadp://..."
 ```
 
-May need to add PolicyKit rule for NetworkManager access.
-
-### openSUSE
-
-Similar to Fedora. Use alien or YaST to install converted RPM.
-
-### Gentoo
-
-Extract manually and install to `/opt/aruba-onboard/`:
-```bash
-mkdir -p /opt/aruba-onboard/bin
-cp usr/share/aruba-onboard/bin/* /opt/aruba-onboard/bin/
-chmod +x /opt/aruba-onboard/bin/*
-```
+After enrollment completes, manually configure NetworkManager using the steps in "Manual NetworkManager Configuration" above.
 
 ---
 
