@@ -246,9 +246,24 @@ grep -oP 'string "[a-zA-Z0-9]{32}"' /tmp/dbus-capture.log | tail -1
 
 ---
 
-## Network Requirements
+## System & Network Requirements
 
-### Must Have (Any Distro)
+### System Requirements
+
+The Aruba Onboard binaries have specific expectations about the Linux environment:
+
+1.  **/etc/os-release (Specifically `VERSION_ID`)**:
+    - **Why**: The application parses this file to identify the OS version.
+    - **Issue**: If `VERSION_ID` is missing (common on Arch Linux or other rolling releases), the application may **crash immediately** upon launch.
+    - **Fix**: Ensure `VERSION_ID` exists. Adding `VERSION_ID="rolling"` to `/etc/os-release` is a known working fix for Arch.
+    - **Fakeroot/Chroot/Unshare**: If running in a restricted environment, you can use the provided `docs/os-release.example` to trick the application into thinking it is running on a supported Ubuntu system.
+
+2.  **/etc/machine-id**:
+    - **Why**: Certificates are uniquely tied to the machine ID during enrollment.
+    - **Issue**: If this file is missing, invalid, or changed after enrollment, the certificates will fail to work, or enrollment will fail.
+    - **Note**: When moving certificates between installs, you must also preserve the `machine-id` or re-enroll.
+
+### Network Requirements (Must Have)
 
 1. **NetworkManager** (not iwd)
    ```bash
@@ -791,10 +806,12 @@ Save as `/tmp/diagnostic.sh`, run with `bash /tmp/diagnostic.sh`.
 ## Key Reminders for AI Agents
 
 1. **Requires NetworkManager** - Ensure the user is using NetworkManager.
-2. **PKCS#12 password is random** - Cannot be guessed, must capture during enrollment.
-3. **Testing disrupts connectivity** - Prepare reconnect scripts before testing.
-4. **Certificates expire in 1 year** - Check validity before debugging.
-5. **Protocol handler may fail** - Have fallback to manual launch.
-6. **onboard-srv often fails on non-Ubuntu** - Be ready to create NM connection manually.
+2. **VERSION_ID is required** - App may crash if `/etc/os-release` lacks `VERSION_ID`.
+3. **machine-id binds certificates** - Certificates are tied to `/etc/machine-id`.
+4. **PKCS#12 password is random** - Cannot be guessed, must capture during enrollment.
+5. **Testing disrupts connectivity** - Prepare reconnect scripts before testing.
+6. **Certificates expire in 1 year** - Check validity before debugging.
+7. **Protocol handler may fail** - Have fallback to manual launch.
+8. **onboard-srv often fails on non-Ubuntu** - Be ready to create NM connection manually.
 
 **Good luck helping the user connect to UVG WiFi!**
