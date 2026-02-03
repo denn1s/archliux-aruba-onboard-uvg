@@ -2,6 +2,8 @@
 
 Automatic enrollment and configuration for **UVG CAMPUS CENTRAL** WiFi network (802.1X EAP-TLS).
 
+Note: Steps 1 to 4 don't require the univeristy network and can be completed at home.  
+
 ### Quick Start (Arch Linux)
 
 #### Step 1: Install the Package
